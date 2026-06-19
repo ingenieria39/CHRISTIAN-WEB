@@ -53,6 +53,20 @@
       color: #e94560;
     }
 
+    .nav-auth {
+      background: #e94560;
+      color: #fff !important;
+      padding: 7px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      transition: background 0.2s !important;
+    }
+
+    .nav-auth:hover {
+      background: #c73652 !important;
+      color: #fff !important;
+    }
+
     /* SECCIONES */
     section {
       min-height: 100vh;
@@ -236,6 +250,7 @@
       <li><a href="#inicio">Inicio</a></li>
       <li><a href="#nosotros">Nosotros</a></li>
       <li><a href="#contactanos">Contactanos</a></li>
+      <li><a href="auth.html" class="nav-auth" id="nav-auth-btn">Ingresar</a></li>
     </ul>
   </nav>
 
@@ -278,6 +293,23 @@
       </div>
     </div>
   </section>
+
+  <script type="module">
+    import { getSession, logout } from './auth.js'
+    const btn = document.getElementById('nav-auth-btn')
+    getSession().then(session => {
+      if (session) {
+        btn.textContent = 'Cerrar sesión'
+        btn.href = '#'
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault()
+          await logout()
+          btn.textContent = 'Ingresar'
+          btn.href = 'auth.html'
+        })
+      }
+    })
+  </script>
 
   <!-- FOOTER -->
   <footer>
