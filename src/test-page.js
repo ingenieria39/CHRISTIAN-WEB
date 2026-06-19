@@ -42,29 +42,31 @@ if (urlOk && keyOk) {
 }
 
 /* ── 2. TEST CONEXIÓN ── */
-try {
-  const { data, error } = await supabase.auth.getSession()
+;(async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession()
 
-  if (error) {
-    setDot('dot-conn', 'fail')
-    setResult('res-conn', `❌ Error: ${error.message}`, 'fail')
-  } else {
-    setDot('dot-conn', 'ok')
-    const session = data.session
-    if (session) {
-      setResult('res-conn',
-        `✅ Conexión a Supabase OK\n\nSesión activa:\n  Usuario : ${session.user.email}\n  ID      : ${session.user.id}\n  Expira  : ${new Date(session.expires_at * 1000).toLocaleString()}`,
-        'ok'
-      )
+    if (error) {
+      setDot('dot-conn', 'fail')
+      setResult('res-conn', `❌ Error: ${error.message}`, 'fail')
     } else {
-      setResult('res-conn', '✅ Conexión a Supabase OK\n\nNo hay sesión activa.', 'ok')
+      setDot('dot-conn', 'ok')
+      const session = data.session
+      if (session) {
+        setResult('res-conn',
+          `✅ Conexión a Supabase OK\n\nSesión activa:\n  Usuario : ${session.user.email}\n  ID      : ${session.user.id}\n  Expira  : ${new Date(session.expires_at * 1000).toLocaleString()}`,
+          'ok'
+        )
+      } else {
+        setResult('res-conn', '✅ Conexión a Supabase OK\n\nNo hay sesión activa.', 'ok')
+      }
+      enableAuthButtons()
     }
-    enableAuthButtons()
+  } catch (err) {
+    setDot('dot-conn', 'fail')
+    setResult('res-conn', `❌ Excepción: ${err.message}\n\nVerifica las credenciales en tu archivo .env`, 'fail')
   }
-} catch (err) {
-  setDot('dot-conn', 'fail')
-  setResult('res-conn', `❌ Excepción: ${err.message}\n\nVerifica las credenciales en tu archivo .env`, 'fail')
-}
+})()
 
 /* ── 3. AUTH ── */
 function getCredentials() {
