@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Supabase — Christian Web</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', monospace;
+      background: #0d0d0d;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    header {
+      max-width: 680px;
+      margin: 0 auto 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      color: #e94560;
+      letter-spacing: 1px;
+    }
+
+    header a {
+      color: #555;
+      font-size: 0.82rem;
+      text-decoration: none;
+    }
+
+    header a:hover { color: #e94560; }
+
+    .panel {
+      max-width: 680px;
+      margin: 0 auto 20px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 18px;
+      background: #161616;
+      border-bottom: 1px solid #222;
+      font-size: 0.82rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .dot.ok      { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
+    .dot.fail    { background: #ef4444; box-shadow: 0 0 6px #ef444488; }
+    .dot.warn    { background: #f59e0b; box-shadow: 0 0 6px #f59e0b88; }
+    .dot.pending { background: #3b82f6; box-shadow: 0 0 6px #3b82f688; animation: pulse 1s infinite; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .panel-body { padding: 18px; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 0.88rem;
+      gap: 12px;
+    }
+
+    .row:last-child { border-bottom: none; }
+
+    .row .key   { color: #888; flex-shrink: 0; }
+    .row .val   { color: #e0e0e0; text-align: right; word-break: break-all; }
+    .row .ok    { color: #22c55e; }
+    .row .fail  { color: #ef4444; }
+    .row .warn  { color: #f59e0b; }
+
+    .result-box {
+      background: #0a0a0a;
+      border-radius: 6px;
+      padding: 14px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #aaa;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 52px;
+    }
+
+    .result-box.ok   { border-left: 3px solid #22c55e; color: #86efac; }
+    .result-box.fail { border-left: 3px solid #ef4444; color: #fca5a5; }
+    .result-box.warn { border-left: 3px solid #f59e0b; color: #fcd34d; }
+
+    /* FORM TEST */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    input:focus { border-color: #e94560; }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+
+    button {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary { background: #e94560; color: #fff; }
+    .btn-secondary { background: #1e3a5f; color: #7dd3fc; }
+    .btn-ghost { background: #1a1a1a; color: #888; border: 1px solid #2a2a2a; }
+
+    .btn-primary:hover:not(:disabled)   { opacity: 0.85; }
+    .btn-secondary:hover:not(:disabled) { opacity: 0.85; }
+    .btn-ghost:hover:not(:disabled)     { background: #222; }
+
+    small { color: #555; font-size: 0.78rem; display: block; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>SUPABASE · DIAGNÓSTICO</h1>
+  <a href="index.html">← Volver al inicio</a>
+</header>
+
+<!-- 1. CONFIG -->
+<div class="panel" id="panel-config">
+  <div class="panel-header">
+    <div class="dot" id="dot-config"></div>
+    <span>1 · Configuración</span>
+  </div>
+  <div class="panel-body">
+    <div class="row">
+      <span class="key">SUPABASE_URL</span>
+      <span class="val" id="cfg-url">—</span>
+    </div>
+    <div class="row">
+      <span class="key">SUPABASE_ANON_KEY</span>
+      <span class="val" id="cfg-key">—</span>
+    </div>
+    <div class="row">
+      <span class="key">Estado</span>
+      <span class="val" id="cfg-status">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- 2. CONEXIÓN -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="dot pending" id="dot-conn"></div>
+    <span>2 · Prueba de conexión  (getSession)</span>
+  </div>
+  <div class="panel-body">
+    <div class="result-box" id="res-conn">Esperando...</div>
+  </div>
+</div>
+
+<!-- 3. AUTH TEST -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="dot" id="dot-auth"></div>
+    <span>3 · Prueba de autenticación</span>
+  </div>
+  <div class="panel-body">
+    <div class="form-grid">
+      <input type="email"    id="test-email" placeholder="email@prueba.com" value="test@prueba.com" />
+      <input type="password" id="test-pass"  placeholder="contraseña"       value="Test1234!" />
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary"   id="btn-login"    disabled>Login</button>
+      <button class="btn-secondary" id="btn-register" disabled>Registrar</button>
+      <button class="btn-ghost"     id="btn-logout"   disabled>Logout</button>
+    </div>
+    <small>Usa credenciales reales de tu proyecto Supabase para probar.</small>
+    <div class="result-box" id="res-auth" style="margin-top:12px">Sin ejecutar.</div>
+  </div>
+</div>
+
+<script type="module" src="/src/test-page.js"></script>
+
+</body>
+</html>
